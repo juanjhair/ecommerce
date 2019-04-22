@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Firebase</title>
+</head>
+
+<body>
+  
+        <input type="text" id="nombre" placeholder="nombre"><br>
+        <input type="text" id="apellido" placeholder="apellido"><br>
+        <input type="text" id="id" placeholder="apellido"><br>
+        <button id="guardar">guardar</button>
+        <button id="actualizar">actualizar</button>
+        <table id="datos" border="1">
+            <th>Nombre</th>
+            <th>Apellido</th>
+            <th></th>
+            <th></th>
+        </table>
+
+
+
+
+
+
+    <footer>
+
+    </footer>
+
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
+        crossorigin="anonymous"></script>
+
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy"
+        crossorigin="anonymous"></script>
+
+    <script src="https://www.gstatic.com/firebasejs/5.7.1/firebase.js"></script>
+    <script>
+        // Initialize Firebase
+        var config = {
+            apiKey: "AIzaSyBKsvUO6h0rCQYoFvW2hokHUx7JiOUXCwU",
+            authDomain: "modulofirebase-e1a89.firebaseapp.com",
+            databaseURL: "https://modulofirebase-e1a89.firebaseio.com",
+            projectId: "modulofirebase-e1a89",
+            storageBucket: "modulofirebase-e1a89.appspot.com",
+            messagingSenderId: "492538087222"
+        };
+        firebase.initializeApp(config);
+
+        var database=firebase.database();
+
+        $('#guardar').click(function(){
+            var nombre=$('#nombre').val();
+            var apellido=$('#apellido').val();
+            var id=firebase.database().ref().child('personas').push().key; // GENERAR ID
+            firebase.database().ref('personas/'+id).set({
+
+                nombre:nombre,
+                apellido:apellido,
+                id:id
+
+            });
+            $('#nombre').val("");
+            $('#apellido').val("");
+        });
+        //REF PARA REFERIRNOS AL NODO
+        //child_added evento de firebase
+        database.ref('personas').on('child_added',function(data){
+            const row='<tr id="'+data.val().id+'">'+
+            '<td>'+ data.val().nombre+'</td>'+
+            '<td>'+ data.val().apellido+'</td>'+
+            '<td><button value="'+data.val().id+'" onclick="editar(this.value)">editar</button></td>'+
+            '<td><button value="'+data.val().id+'" onclick="eliminar(this.value)">eliminar</button></td>'+
+            '/tr>';
+            $('#datos').append(row);
+        });
+        database.ref('personas').on('child_changed',function(data){
+            $('#'+data.val().id).remove();
+            const row='<tr id="'+data.val().id+'">'+
+            '<td>'+ data.val().nombre+'</td>'+
+            '<td>'+ data.val().apellido+'</td>'+
+            '<td><button value="'+data.val().id+'" onclick="editar(this.value)">editar</button></td>'+
+            '<td><button value="'+data.val().id+'" onclick="eliminar(this.value)">eliminar</button></td>'+
+            '/tr>';
+            $('#datos').append(row);
+        });
+    
+
+    function editar(id){
+        firebase.database().ref('personas/'+id).once('value').then(function(snapshot){
+            var nombre=snapshot.val().nombre;
+            var apellido=snapshot.val().apellido;
+            var id=snapshot.val().id;
+            $('#nombre').val(nombre);
+            $('#apellido').val(apellido);
+            $('#id').val(id);
+        });
+    }
+    $('#actualizar').click(function(event){
+        var id=$('#id').val();
+        var nombre=$('#nombre').val();
+        var apellido=$('#apellido').val();
+        var post= {
+            nombre: nombre,
+            apellido: apellido
+        };
+
+        database.ref('personas/'+id).update(post);
+        $('nombre').val("");
+        $('apellido').val("");
+
+    });
+    function eliminar(id){
+        firebase.database().ref('personas/'+id).remove();
+    }
+
+    database.ref('personas').on('child_removed',function(data){
+        $('#'+data.val().id).remove();
+    });
+    </script>
+</body>
+
+</html>

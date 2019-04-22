@@ -1,0 +1,10 @@
+
+.body_index {
+    display: flex;
+    min-height: 100vh;
+    flex-direction: column;
+    background-image: url("../img/fondo.jpg");
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-attachment: fixed;
+}       
